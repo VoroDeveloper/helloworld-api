@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!--
+ * --------------------------------------------------------------------------
+ * Copyright 2026 VoroDeveloper
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://apache.org
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * --------------------------------------------------------------------------
+-->
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Hello World API - Interactive REST Documentation (OpenAPI 3.1)</title>
+
+    <link rel="stylesheet" href="./styles.css">
+
+</head>
+
+<body>
+    <div class="theme-switcher" id="theme-switcher">
+        <label for="scalar-mode">🎨 Tema:</label>
+        <select id="scalar-mode" aria-label="Light or dark mode">
+            <option value="light">Light</option>
+            <option value="dark">Dark</option>
+        </select>
+
+        <select id="scalar-theme" aria-label="Select theme">
+            <option value="default">Default</option>
+            <option value="alternate">Alternate</option>
+            <option value="bluePlanet">Blue Planet</option>
+            <option value="deepSpace">Deep Space</option>
+            <option value="elysiajs">ElysiaJS</option>
+            <option value="fastify">Fastify</option>
+            <option value="halloween">Halloween</option>
+            <option value="kepler">Kepler</option>
+            <option value="laserwave">Laserwave</option>
+            <option value="mars">Mars</option>
+            <option value="moon">Moon</option>
+            <option value="purple">Purple</option>
+            <option value="saturn">Saturn</option>
+            <option value="solarized">Solarized</option>
+        </select>
+    </div>
+
+    <div id="scalar-container"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"></script>
+
+    <script>
+        const switcher = document.getElementById('theme-switcher');
+        const modeSelect = document.getElementById('scalar-mode');
+        const themeSelect = document.getElementById('scalar-theme');
+        const container = document.getElementById('scalar-container');
+
+        let currentTheme = localStorage.getItem('scalar-theme') || 'bluePlanet';
+        let currentMode = localStorage.getItem('scalar-mode') || 'light';
+
+        themeSelect.value = currentTheme;
+        modeSelect.value = currentMode;
+
+        function updateSwitcherStyle() {
+            switcher.classList.toggle('is-dark', currentMode === 'dark');
+        }
+
+        function renderScalar() {
+            container.innerHTML = '';
+
+            if (window.Scalar && typeof window.Scalar.createApiReference === 'function') {
+                Scalar.createApiReference(container, {
+                    url: './openapi.yaml',
+                    theme: currentTheme,
+                    forceDarkModeState: currentMode,
+                    hideDarkModeToggle: true,
+                    layout: 'modern'
+                });
+            }
+        }
+
+        updateSwitcherStyle();
+        renderScalar();
+
+        modeSelect.addEventListener('change', (e) => {
+            currentMode = e.target.value;
+            localStorage.setItem('scalar-mode', currentMode);
+            updateSwitcherStyle();
+            renderScalar();
+        });
+
+        themeSelect.addEventListener('change', (e) => {
+            currentTheme = e.target.value;
+            localStorage.setItem('scalar-theme', currentTheme);
+            renderScalar();
+        });
+
+    </script>
+</body>
+</html>

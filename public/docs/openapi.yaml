@@ -1,0 +1,329 @@
+openapi: 3.1.0
+
+# --------------------------------------------------------------------------
+# Copyright 2026 VoroDeveloper
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://apache.org
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# --------------------------------------------------------------------------
+
+info:
+  title: Hello World API
+  version: 1.0.0
+  description: >
+    Lightweight REST API developed in pure PHP that provides the “Hello world”
+    greeting in six languages (Deutsch (de), English (en), Español (es),
+    Français (fr), Italiano (it), Português (pt)).
+    Each greeting is returned as a JSON object with four letter-case variants
+    (Original, lowercase, Title Case, and UPPERCASE).
+    The hosted API at vorodev.com is free to use.
+  termsOfService: https://github.com/vorodeveloper/helloworld-api#attribution--terms-of-use
+  contact:
+    name: VoroDeveloper
+    url: https://vorodeveloper.com
+    email: contact@vorodeveloper.com
+  license:
+    name: Apache-2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+
+servers:
+  - url: https://vorodev.com/api/helloworld
+    description: Production server
+
+tags:
+  - name: General information
+    description: Service metadata and resources available for getting started with the API.
+  - name: Supported languages
+    description: Queries for the supported languages catalog and its language codes.
+  - name: Greetings
+    description: Retrieval of "Hello world" in a specific language and in its typographic variants.
+
+paths:
+  /:
+    get:
+      tags:
+        - General information
+      summary: General API information
+      description: Returns basic service metadata, available endpoints, and the catalog of supported languages.
+      operationId: getApiInfo
+      responses:
+        '200':
+          description: API information retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiInfoResponse'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /languages:
+    get:
+      tags:
+        - Supported languages
+      summary: List supported languages
+      description: Returns the total count and list of language codes and names supported by the API.
+      operationId: listLanguages
+      responses:
+        '200':
+          description: Language list retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LanguageListResponse'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /{languageCode}:
+    get:
+      tags:
+        - Greetings
+      summary: Get greeting by language
+      description: >
+        Returns the "Hello world" greeting in the requested language along with its
+        typographic variants. The parameter is case-insensitive.
+      operationId: getGreetingByLanguage
+      parameters:
+        - name: languageCode
+          in: path
+          required: true
+          description: International language code (ISO 639-1 / BCP 47).
+          schema:
+            type: string
+            enum:
+              - de
+              - en
+              - es
+              - fr
+              - it
+              - pt
+            examples:
+              - en
+      responses:
+        '200':
+          description: Greeting found and formatted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GreetingResponse'
+        '404':
+          description: Unsupported language code
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnsupportedLanguageError'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  schemas:
+    ApiInfoResponse:
+      type: object
+      required:
+        - service
+        - endpoints
+        - supportedLanguages
+      properties:
+        service:
+          type: string
+          description: Service name.
+          examples:
+            - Hello World API
+        endpoints:
+          type: object
+          required:
+            - apiInfo
+            - listLanguages
+            - getGreeting
+          properties:
+            apiInfo:
+              type: string
+              description: Path for general API information.
+              examples:
+                - /
+            listLanguages:
+              type: string
+              description: Path for listing supported languages.
+              examples:
+                - /languages
+            getGreeting:
+              type: string
+              description: Route template for retrieving a greeting by language.
+              examples:
+                - /{languageCode}
+        supportedLanguages:
+          type: array
+          description: Languages supported by the API.
+          items:
+            $ref: '#/components/schemas/LanguageItem'
+
+    LanguageItem:
+      type: object
+      required:
+        - code
+        - language
+      properties:
+        code:
+          type: string
+          description: International language code (ISO 639-1).
+          examples:
+            - en
+        language:
+          type: string
+          description: Native name of the language.
+          examples:
+            - English
+
+    GreetingResponse:
+      type: object
+      required:
+        - code
+        - language
+        - greeting
+      properties:
+        code:
+          type: string
+          examples:
+            - en
+        language:
+          type: string
+          examples:
+            - English
+        greeting:
+          type: object
+          required:
+            - original
+            - lowercase
+            - titleCase
+            - uppercase
+          properties:
+            original:
+              type: string
+              description: Original greeting in standard sentence format.
+              examples:
+                - Hello world
+            lowercase:
+              type: string
+              description: Greeting completely in lowercase.
+              examples:
+                - hello world
+            titleCase:
+              type: string
+              description: Greeting with the first letter of each word capitalized.
+              examples:
+                - Hello World
+            uppercase:
+              type: string
+              description: Greeting completely in uppercase.
+              examples:
+                - HELLO WORLD
+
+    LanguageListResponse:
+      type: object
+      required:
+        - total
+        - languages
+      properties:
+        total:
+          type: integer
+          description: Total number of supported languages.
+          examples:
+            - 6
+        languages:
+          type: array
+          items:
+            $ref: '#/components/schemas/LanguageItem'
+
+    BaseError:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: object
+          required:
+            - code
+            - message
+          properties:
+            code:
+              type: string
+              examples:
+                - ENDPOINT_NOT_FOUND
+            message:
+              type: string
+              examples:
+                - The requested endpoint was not found.
+
+    UnsupportedLanguageError:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: object
+          required:
+            - code
+            - message
+            - details
+          properties:
+            code:
+              type: string
+              examples:
+                - UNSUPPORTED_LANGUAGE
+            message:
+              type: string
+              examples:
+                - Language code 'xx' is not supported.
+            details:
+              type: object
+              required:
+                - supportedLanguages
+              properties:
+                supportedLanguages:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/LanguageItem'
+
+  responses:
+    InternalServerError:
+      description: Unexpected error while processing the request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/BaseError'
+          example:
+            error:
+              code: INTERNAL_SERVER_ERROR
+              message: An unexpected internal server error occurred.
+
+    MethodNotAllowed:
+      description: HTTP method not allowed for this endpoint.
+      headers:
+        Allow:
+          description: HTTP methods supported by the resource.
+          schema:
+            type: string
+            examples:
+              - GET
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/BaseError'
+          example:
+            error:
+              code: METHOD_NOT_ALLOWED
+              message: The POST method is not allowed for this endpoint.
