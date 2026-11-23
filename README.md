@@ -24,6 +24,8 @@ For each language, it returns the greeting in the following formats:
 
 Designed following modern HTTP standards: Front Controller architecture, PSR-4 autoloading, CORS headers, semantic HTTP status code handling (`200`, `204`, `404`, `405` with `Allow` header), and structured error responses.
 
+[![Run in Postman](https://img.shields.io/badge/Run_in_Postman-VoroDeveloper_APIs-FF6C37?logo=postman)](https://www.postman.com/vorodev/vorodeveloper-apis)
+
 ---
 
 🌐 **Live Production Demo:**
@@ -367,6 +369,7 @@ php stats.php 202611
 
 - **Interactive Documentation:** [https://vorodev.com/api/helloworld/docs/](https://vorodev.com/api/helloworld/docs/)
 
+- **Postman Collection:** [https://www.postman.com/vorodev/vorodeveloper-apis](https://www.postman.com/vorodev/vorodeveloper-apis)
 
 ---
 
